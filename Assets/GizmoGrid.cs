@@ -8,8 +8,7 @@ public class GridGizmoDrawer : MonoBehaviour
     private void OnDrawGizmos()
     {
         if (settings == null) settings = GameSettingsLoader.Settings;
-        Gizmos.color = settings.cellColor;
-
+        
         Vector3 origin = transform.position;
 
         // Vertical lines (X direction)

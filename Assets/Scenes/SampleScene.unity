@@ -593,7 +593,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec8dff9e6e2ca3c499d39cb013078af6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CursorVisual
-  gridVisual: {fileID: 189269454}
 --- !u!4 &1231391264
 Transform:
   m_ObjectHideFlags: 0
@@ -664,7 +663,7 @@ GameObject:
   - component: {fileID: 1353886979}
   - component: {fileID: 1353886980}
   m_Layer: 0
-  m_Name: TacticalGame
+  m_Name: GameController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -703,6 +702,62 @@ MonoBehaviour:
   overlayVisual: {fileID: 207873355}
   fogVisual: {fileID: 1507505872}
   pathPreview: {fileID: 2057210859}
+  prototypeSetup: {fileID: 1445312180}
+--- !u!1 &1445312179
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1445312181}
+  - component: {fileID: 1445312180}
+  m_Layer: 0
+  m_Name: PrototypeSetup
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1445312180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1445312179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0877e63ce3d69ca478a22a1739b70492, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PrototypeSetup
+  unitVisual: {fileID: 1269225244}
+  playerUnitPrefabs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  aiUnitPrefabs:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+--- !u!4 &1445312181
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1445312179}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 6.97115, y: 0.05, z: 7.46287}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1507505871
 GameObject:
   m_ObjectHideFlags: 0
@@ -759,7 +814,7 @@ GameObject:
   - component: {fileID: 2057210860}
   - component: {fileID: 2057210859}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: PathPreview
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -835,8 +890,8 @@ LineRenderer:
       serializedVersion: 2
       m_Curve:
       - serializedVersion: 3
-        time: 0.056365967
-        value: 0.11428642
+        time: 0
+        value: 0.5285721
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -912,8 +967,9 @@ SceneRoots:
   - {fileID: 1353886979}
   - {fileID: 189269455}
   - {fileID: 1269225245}
+  - {fileID: 1231391264}
   - {fileID: 207873356}
   - {fileID: 1507505873}
-  - {fileID: 1231391264}
-  - {fileID: 1140838992}
   - {fileID: 2057210861}
+  - {fileID: 1445312181}
+  - {fileID: 1140838992}

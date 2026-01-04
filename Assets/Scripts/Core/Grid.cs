@@ -1,11 +1,11 @@
-public class GridData
+public class Grid
 {
     public int width;
     public int height;
     public float cellSize;
     public GridCell[,] cells;
 
-    public GridData(int width, int height, float cellSize)
+    public Grid(int width, int height, float cellSize)
     {
         this.width = width;
         this.height = height;

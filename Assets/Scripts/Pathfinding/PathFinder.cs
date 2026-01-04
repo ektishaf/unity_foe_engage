@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class PathFinder
 {
-    public static List<Vector2Int> FindPathAStar(Unit unit, Vector2Int target, GridData grid, Unit[,] unitMap)
+    public static List<Vector2Int> FindPathAStar(Unit unit, Vector2Int target, Grid grid, Unit[,] unitMap)
     {
         Vector2Int start = unit.GridPos;
         List<Vector2Int> path = new List<Vector2Int>();

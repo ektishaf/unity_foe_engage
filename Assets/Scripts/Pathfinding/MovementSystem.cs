@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class MovementSystem
 {
-    public static HashSet<Vector2Int> GetMoveRange(GridData grid, Unit unit)
+    public static HashSet<Vector2Int> GetMoveRange(Grid grid, Unit unit)
     {
         var visited = new HashSet<Vector2Int>();
         var queue = new Queue<(Vector2Int pos, int cost)>();
@@ -33,7 +33,7 @@ public static class MovementSystem
         return visited;
     }
 
-    public static HashSet<Vector2Int> GetAttackRange(GridData grid, Unit unit)
+    public static HashSet<Vector2Int> GetAttackRange(Grid grid, Unit unit)
     {
         var attackTiles = new HashSet<Vector2Int>();
         for (int dx = -unit.attackRange; dx <= unit.attackRange; dx++)

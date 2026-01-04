@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class UnitVisual : MonoBehaviour
 {
-     Dictionary<Unit, GameObject> unitObjects = new Dictionary<Unit, GameObject>();
-
-    private Transform container;
-    private GameSettings settings;
-    private void Awake()
+    GameSettings settings;
+    Transform container;
+    Dictionary<Unit, GameObject> visuals = new Dictionary<Unit, GameObject>();
+    
+    public void Init()
     {
         settings = GameSettingsLoader.Settings;
 
@@ -17,22 +17,62 @@ public class UnitVisual : MonoBehaviour
         container = obj.transform;
     }
 
-    public void SpawnUnits(List<Unit> units)
+    public void SpawnUnit(Unit unit, GameObject prefab = null)
     {
-        foreach (var u in units)
-        {
-            GameObject go = Instantiate(settings.defaultUnitPrefab, GridUtility.GridToWorld(u, 1f), Quaternion.identity, container);
-            go.name = u.unitName;
-            unitObjects[u] = go;
+        if (visuals.ContainsKey(unit)) return;
 
-            if (u.visual == null)
-                u.visual = go.transform;
+        if (prefab == null) prefab = settings.defaultUnitPrefab;
+        if (prefab == null)
+        {
+            Debug.LogError("No prefab assigned for unit: " + unit.unitName);
+            return;
+        }
+
+        Vector3 position = GridUtility.GridToWorld(unit, settings.cellSize);
+        GameObject visual = Instantiate(prefab, position, Quaternion.identity, container);
+        visual.name = unit.unitName;
+        visuals[unit] = visual;
+
+        if(unit.visual == null)
+        {
+            unit.visual = visual.transform;
+        }
+    }
+
+    public void SpawnUnits(List<Unit> units, List<GameObject> unitPrefabs)
+    {
+        ClearAll();
+
+        for(int i = 0; i < units.Count; i++)
+        {
+            SpawnUnit(units[i], unitPrefabs[i]);
         }
     }
 
     public void UpdateUnitPosition(Unit unit)
     {
-        if (unitObjects.ContainsKey(unit))
-            unitObjects[unit].transform.position = GridUtility.GridToWorld(unit, 1f);
+        if (!visuals.TryGetValue(unit, out GameObject visual)) return;
+
+        visual.transform.position = GridUtility.GridToWorld(unit, settings.cellSize);
+    }
+
+    public void RemoveUnit(Unit unit)
+    {
+        if (!visuals.TryGetValue(unit, out GameObject visual)) return;
+
+        Destroy(visual);
+        visuals.Remove(unit);
+    }
+
+    public void ClearAll()
+    {
+        foreach (var visual in visuals)
+        {
+            if (visual.Value != null)
+            {
+                Destroy(visual.Value);
+            }
+        }
+        visuals.Clear();
     }
 }

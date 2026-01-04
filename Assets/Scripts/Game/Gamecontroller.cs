@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    GameSettings settings;
+    Cursor cursor;
+
     [Header("Grid")]
     public GridVisual gridVisual;
-    public GridData gridData;
+    public Grid grid;
 
-    [Header("Units")]
+    [Header("Unit")]
     public UnitVisual unitVisual;
-    public List<Unit> units = new List<Unit>();
 
     [Header("Cursor")]
     public CursorVisual cursorVisual;
@@ -25,27 +26,33 @@ public class GameController : MonoBehaviour
     public PathPreview pathPreview;
     Unit[,] unitMap;
 
-    private Cursor cursor;
-    private GameSettings settings;
+    [Header("Prototype")]
+    public PrototypeSetup prototypeSetup;
 
     void Awake()
     {
         settings = GameSettingsLoader.Settings;
-        gridData = new GridData(settings.gridWidth, settings.gridHeight, settings.cellSize);
+        grid = new Grid(settings.gridWidth, settings.gridHeight, settings.cellSize);
         cursor = new Cursor(settings.gridWidth / 2, 0);
-        unitMap = new Unit[gridData.width, gridData.height];
+        unitMap = new Unit[grid.width, grid.height];
+
+        gridVisual.Init(grid);
+        unitVisual.Init();
+        cursorVisual.Init(grid, cursor);
+        overlayVisual.Init();
+        fogVisual.Init(grid);
+        prototypeSetup.Init();
+        pathPreview.Init(grid);
     }
 
     private void Start()
     {
-   
-        gridVisual.Build(gridData);
-        SpawnUnits();
-        unitVisual.SpawnUnits(units);
-        fogVisual.Build(gridData);
-        fogVisual.UpdateFog(units.ToArray());
-        cursorVisual.Initialize(cursor, gridVisual);
-        overlayVisual.Initialize(gridVisual);
+        gridVisual.Build();
+        prototypeSetup.SpawnUnits();
+        overlayVisual.Init();
+        fogVisual.Build();
+        fogVisual.UpdateFog(prototypeSetup.units.ToArray());
+        unitMap = BuildUnitMap(prototypeSetup.units, grid.width, grid.height);
     }
 
     void Update()
@@ -57,10 +64,10 @@ public class GameController : MonoBehaviour
 
     void HandleUnitSelection()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(settings.selectKey))
         {
             // select unit under cursor
-            foreach (var u in units)
+            foreach (var u in prototypeSetup.units)
             {
                 if (u.x == cursor.x && u.y == cursor.y)
                 {
@@ -77,13 +84,13 @@ public class GameController : MonoBehaviour
         if (selectedUnit != null)
         {
             // move unit with cursor and M key
-            if (Input.GetKeyDown(KeyCode.M))
+            if (Input.GetKeyDown(settings.moveKey))
             {
                 selectedUnit.x = cursor.x;
                 selectedUnit.y = cursor.y;
-                unitVisual.UpdateUnitPosition(selectedUnit);
+                prototypeSetup.unitVisual.UpdateUnitPosition(selectedUnit);
                 overlayVisual.Clear();
-                fogVisual.UpdateFog(units.ToArray());
+                fogVisual.UpdateFog(prototypeSetup.units.ToArray());
             }
         }
 
@@ -92,55 +99,12 @@ public class GameController : MonoBehaviour
 
     void ShowUnitRanges(Unit u)
     {
-        var moveRange = MovementSystem.GetMoveRange(gridData, u);
+        overlayVisual.Clear();
+        var moveRange = MovementSystem.GetMoveRange(grid, u);
         overlayVisual.ShowMovement(moveRange);
-        Debug.Log($"Move Range: {moveRange.Count}");
-        //var attackRange = MovementSystem.GetAttackRange(gridData, u);
-        //Debug.Log($"Attack Range: {attackRange.Count}");
-        //overlayVisual.ShowAttack(attackRange);
-    }
-
-    void SpawnUnits()
-    {
-        units.Clear();
-
-        // Team 1: Bottom center
-        for (int i = 0; i < settings.unitsPerTeam; i++)
-        {
-            Unit u = new Unit
-            {
-                unitName = $"Unit_T1_{i + 1}",
-                team = 1,
-                x = settings.gridWidth / 2,
-                y = i,
-                movementPoints = 3,
-                attackRange = 5,
-                health = 10,
-                attack = 5,
-                defense = 2
-            };
-            units.Add(u);
-            unitMap[u.x, u.y] = u;
-        }
-
-        // Team 2: Top center
-        for (int i = 0; i < settings.unitsPerTeam; i++)
-        {
-            Unit u = new Unit
-            {
-                unitName = $"Unit_T2_{i + 1}",
-                team = 2,
-                x = settings.gridWidth / 2,
-                y = settings.gridHeight - 1 - i,
-                movementPoints = 3,
-                attackRange = 1,
-                health = 10,
-                attack = 5,
-                defense = 2
-            };
-            units.Add(u);
-            unitMap[u.x, u.y] = u;
-        }
+        
+        var attackRange = MovementSystem.GetAttackRange(grid, u);
+        overlayVisual.ShowAttack(attackRange);
     }
 
     void UpdatePathPreview()
@@ -151,7 +115,7 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        List<Vector2Int> path = PathFinder.FindPathAStar(selectedUnit, new Vector2Int(cursor.x, cursor.y),gridData, unitMap);
+        List<Vector2Int> path = PathFinder.FindPathAStar(selectedUnit, new Vector2Int(cursor.x, cursor.y), grid, unitMap);
 
         // Optional: limit by movement points
         if (path.Count > selectedUnit.movementPoints)
@@ -163,10 +127,7 @@ public class GameController : MonoBehaviour
         pathPreview.DrawPath(path);
     }
 
-    public static Unit[,] BuildUnitMap(
-    List<Unit> units,
-    int width,
-    int height)
+    public static Unit[,] BuildUnitMap(List<Unit> units, int width, int height)
     {
         Unit[,] unitMap = new Unit[width, height];
 

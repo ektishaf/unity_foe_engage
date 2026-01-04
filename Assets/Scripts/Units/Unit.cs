@@ -10,7 +10,7 @@ public class Unit
     public int health;
     public int attack;
     public int defense;
-    public int visionRange = 4;
+    public int visionRange = 1;
     public bool hasActed;
     public Transform visual;         // optional for rendering
 

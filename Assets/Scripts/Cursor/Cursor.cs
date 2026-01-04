@@ -10,7 +10,7 @@ public class Cursor
         y = startY;
     }
 
-    public void Move(int dx, int dy, GridData grid)
+    public void Move(int dx, int dy, Grid grid)
     {
         int newX = Mathf.Clamp(x + dx, 0, grid.width - 1);
         int newY = Mathf.Clamp(y + dy, 0, grid.height - 1);

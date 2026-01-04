@@ -4,21 +4,19 @@ using UnityEngine;
 [RequireComponent(typeof(LineRenderer))]
 public class PathPreview : MonoBehaviour
 {
+    Grid grid;
     LineRenderer line;
-    GridVisual grid;
 
-    void Awake()
+    public void Init(Grid grid)
     {
+        this.grid = grid;
         line = GetComponent<LineRenderer>();
-        grid = FindObjectOfType<GridVisual>();
-
         line.positionCount = 0;
         line.useWorldSpace = true;
         line.widthMultiplier = 0.1f;
-
-        line.material = new Material(Shader.Find("Sprites/Default"));
-        line.startColor = Color.cyan;
-        line.endColor = Color.cyan;
+        //line.material = new Material(Shader.Find("Sprites/Default"));
+        //line.startColor = Color.cyan;
+        //line.endColor = Color.cyan;
     }
 
     public void DrawPath(List<Vector2Int> path)
@@ -32,12 +30,12 @@ public class PathPreview : MonoBehaviour
         line.positionCount = path.Count + 1;
 
         // Start at unit position
-        line.SetPosition(0, GridUtility.GridToWorld(path[0].x, path[0].y, grid.gridData.cellSize));
+        line.SetPosition(0, GridUtility.GridToWorld(path[0].x, path[0].y, grid.cellSize));
 
         for (int i = 0; i < path.Count; i++)
         {
-            Vector3 pos = GridUtility.GridToWorld(path[i].x, path[i].y, grid.gridData.cellSize);
-            pos.y += 0.05f; // slightly above grid
+            Vector3 pos = GridUtility.GridToWorld(path[i].x, path[i].y, grid.cellSize);
+            pos.y += 0.2f; // slightly above grid
             line.SetPosition(i + 1, pos);
         }
     }

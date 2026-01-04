@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class FogSystem
 {
-    public static void UpdateFog(GridData grid, List<Unit> units)
+    public static void UpdateFog(Grid grid, List<Unit> units)
     {
         // Step 1: downgrade old visibility
         for (int x = 0; x < grid.width; x++)

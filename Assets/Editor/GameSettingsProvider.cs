@@ -22,17 +22,13 @@ static class GameSettingsProvider
                 EditorGUILayout.PropertyField(so.FindProperty("gridHeight"));
                 EditorGUILayout.PropertyField(so.FindProperty("cellSize"));
                 EditorGUILayout.PropertyField(so.FindProperty("cellPrefab"));
-                EditorGUILayout.PropertyField(so.FindProperty("cellColor"));
 
                 EditorGUILayout.PropertyField(so.FindProperty("cursorCellPrefab"));
-                EditorGUILayout.PropertyField(so.FindProperty("cursorCellColor"));
 
                 EditorGUILayout.PropertyField(so.FindProperty("moveCellPrefab"));
-                EditorGUILayout.PropertyField(so.FindProperty("moveCellColor"));
                 EditorGUILayout.PropertyField(so.FindProperty("moveAnimDuration"));
 
                 EditorGUILayout.PropertyField(so.FindProperty("attackCellPrefab"));
-                EditorGUILayout.PropertyField(so.FindProperty("attackCellColor"));
 
                 EditorGUILayout.Space();
                 EditorGUILayout.PropertyField(so.FindProperty("defaultUnitPrefab"));
@@ -41,7 +37,6 @@ static class GameSettingsProvider
                 EditorGUILayout.PropertyField(so.FindProperty("defaultVisionRange"));
 
                 EditorGUILayout.PropertyField(so.FindProperty("fogCellPrefab"));
-                EditorGUILayout.PropertyField(so.FindProperty("fogCellColor"));
 
                 EditorGUILayout.PropertyField(so.FindProperty("unitsPerTeam"));
 

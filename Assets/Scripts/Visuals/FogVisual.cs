@@ -2,53 +2,44 @@ using UnityEngine;
 
 public class FogVisual : MonoBehaviour
 {
-    GameObject[,] fogTiles;
-    GridData gridData;
-    Transform container;
     GameSettings settings;
-
-    private void Awake()
+    Transform container;
+    Grid grid;
+    GameObject[,] visuals;
+    
+    public void Init(Grid grid)
     {
         settings = GameSettingsLoader.Settings;
+        this.grid = grid;
 
-        GameObject obj = new GameObject("FogContainer");
-        obj.transform.position = Vector3.zero;
-        obj.transform.rotation = Quaternion.identity;
-        container = obj.transform;
+        container = new GameObject("FogContainer").transform;
+        container.position = Vector3.zero;
+        container.rotation = Quaternion.identity;
     }
 
-    public void Build(GridData grid)
+    public void Build()
     {
-        gridData = grid;
-        fogTiles = new GameObject[grid.width, grid.height];
+        visuals = new GameObject[grid.width, grid.height];
 
         for (int x = 0; x < grid.width; x++)
         {
             for (int y = 0; y < grid.height; y++)
             {
-                GameObject f = Instantiate(settings.fogCellPrefab, GridUtility.GridToWorld(x, y, grid.cellSize), Quaternion.identity, container);
-                f.name = $"Fog_{x}_{y}";
-                var meshRenderer = f.GetComponentInChildren<MeshRenderer>();
-                if (meshRenderer)
-                {
-                    meshRenderer.material.color = settings.fogCellColor;
-                }
-                fogTiles[x, y] = f;
+                GameObject visual = Instantiate(settings.fogCellPrefab, GridUtility.GridToWorld(x, y, grid.cellSize), Quaternion.identity, container);
+                visual.name = $"Fog_{x}_{y}";
+                visuals[x, y] = visual;
             }
         }
     }
 
-    /// <summary>
-    /// Updates fog based on units' vision
-    /// </summary>
     public void UpdateFog(Unit[] units)
     {
         // first, cover everything
-        for (int x = 0; x < gridData.width; x++)
+        for (int x = 0; x < grid.width; x++)
         {
-            for (int y = 0; y < gridData.height; y++)
+            for (int y = 0; y < grid.height; y++)
             {
-                fogTiles[x, y].SetActive(true);
+                visuals[x, y].SetActive(true);
             }
         }
         // then uncover tiles within each unit's vision range
@@ -61,9 +52,9 @@ public class FogVisual : MonoBehaviour
                 {
                     int nx = u.x + dx;
                     int ny = u.y + dy;
-                    if (gridData.Inside(nx, ny))
+                    if (grid.Inside(nx, ny))
                     {
-                        fogTiles[nx, ny].SetActive(false);
+                        visuals[nx, ny].SetActive(false);
                     }
                 }
             }

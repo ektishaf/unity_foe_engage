@@ -8,20 +8,16 @@ public class GameSettings : ScriptableObject
     public int gridHeight = 10;
     public float cellSize = 1f;
     public GameObject cellPrefab;
-    public Color cellColor = Color.grey;
 
     [Header("Cursor")]
     public GameObject cursorCellPrefab;
-    public Color cursorCellColor = Color.yellow;
 
     [Header("Movement")]
     public GameObject moveCellPrefab;
-    public Color moveCellColor = Color.green;
     public float moveAnimDuration = 0.2f;
 
     [Header("Attack")]
     public GameObject attackCellPrefab;
-    public Color attackCellColor = Color.red;
 
     [Header("Units")]
     public GameObject defaultUnitPrefab;
@@ -31,7 +27,6 @@ public class GameSettings : ScriptableObject
 
     [Header("Fog")]
     public GameObject fogCellPrefab;
-    public Color fogCellColor = Color.olive;
 
     [Header("Teams")]
     public int unitsPerTeam = 3;
