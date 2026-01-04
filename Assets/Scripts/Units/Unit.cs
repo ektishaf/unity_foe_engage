@@ -10,10 +10,9 @@ public class Unit
     public int health;
     public int attack;
     public int defense;
+    public int visionRange = 4;
+    public bool hasActed;
+    public Transform visual;         // optional for rendering
 
-    // Optional
-    public bool hasActed;            // Used in turn system
-
-    public Transform visual;
+    public Vector2Int GridPos => new Vector2Int(x, y);
 }
-
