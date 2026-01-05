@@ -18,4 +18,12 @@ public static class GridUtility
         int y = Mathf.RoundToInt(world.z / cellSize);
         return new Vector2Int(x, y);
     }
+
+    public static Vector2Int[] Directions => new Vector2Int[]
+    {
+        Vector2Int.up,
+        Vector2Int.down,
+        Vector2Int.left,
+        Vector2Int.right
+    };
 }

@@ -7,6 +7,14 @@ public enum FogState
     Visible
 }
 
+public enum AIDifficulty
+{
+    Dumb,
+    Normal,
+    Smart
+}
+
+
 public class GridCell
 {
     public Vector2Int position;
@@ -15,7 +23,7 @@ public class GridCell
     public int height = 0;
     public bool occupied = false;
     public FogState fogState = FogState.Hidden;
-
+    public bool visibleToAI;
     public GridCell(int x, int y)
     {
         position = new Vector2Int(x, y);

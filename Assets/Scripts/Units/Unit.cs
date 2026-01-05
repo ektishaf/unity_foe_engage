@@ -13,6 +13,7 @@ public class Unit
     public int visionRange = 1;
     public bool hasActed;
     public Transform visual;         // optional for rendering
+    public AIDifficulty difficulty;
 
     public Vector2Int GridPos => new Vector2Int(x, y);
 }
