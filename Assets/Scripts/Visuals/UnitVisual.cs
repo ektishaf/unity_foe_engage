@@ -5,11 +5,13 @@ public class UnitVisual : MonoBehaviour
 {
     GameSettings settings;
     Transform container;
+    Grid grid;
     Dictionary<Unit, GameObject> visuals = new Dictionary<Unit, GameObject>();
     
-    public void Init()
+    public void Init(Grid grid)
     {
         settings = GameSettingsLoader.Settings;
+        this.grid = grid;
 
         GameObject obj = new GameObject("UnitContainer");
         obj.transform.position = Vector3.zero;
@@ -28,7 +30,7 @@ public class UnitVisual : MonoBehaviour
             return;
         }
 
-        Vector3 position = GridUtility.GridToWorld(unit, settings.cellSize);
+        Vector3 position = grid.GridToWorld(unit);
         GameObject visual = Instantiate(prefab, position, Quaternion.identity, container);
         visual.name = unit.unitName;
         visuals[unit] = visual;
@@ -53,7 +55,7 @@ public class UnitVisual : MonoBehaviour
     {
         if (!visuals.TryGetValue(unit, out GameObject visual)) return;
 
-        visual.transform.position = GridUtility.GridToWorld(unit, settings.cellSize);
+        visual.transform.position = grid.GridToWorld(unit);
     }
 
     public void RemoveUnit(Unit unit)

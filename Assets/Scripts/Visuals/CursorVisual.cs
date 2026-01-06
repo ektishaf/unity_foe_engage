@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class CursorVisual : MonoBehaviour
@@ -7,11 +5,13 @@ public class CursorVisual : MonoBehaviour
     GameSettings settings;
     Transform visual;
     Cursor cursor;
+    Grid grid;
     
     public void Init(Cursor cursor)
     {
         settings = GameSettingsLoader.Settings;
         this.cursor = cursor;
+        grid = this.cursor.GridRef;
 
         visual = Instantiate(settings.cursorCellPrefab, Vector3.zero, Quaternion.identity).transform;
         visual.position = Vector3.zero;
@@ -22,7 +22,7 @@ public class CursorVisual : MonoBehaviour
 
     void UpdatePosition()
     {
-        visual.position = GridUtility.GridToWorld(cursor.x, cursor.y, cursor.GridRef.cellSize) + new Vector3(0, 0.2f, 0);
+        visual.position = grid.GridToWorld(cursor.x, cursor.y) + new Vector3(0, 0.2f, 0);
     }
 
     void Update()

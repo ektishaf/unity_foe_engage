@@ -26,7 +26,7 @@ public class GridVisual : MonoBehaviour
         {
             for (int y = 0; y < grid.height; y++)
             {
-                GameObject visual = Instantiate(settings.cellPrefab, GridUtility.GridToWorld(x, y, grid.cellSize), Quaternion.identity, container);
+                GameObject visual = Instantiate(settings.cellPrefab, grid.GridToWorld(x, y), Quaternion.identity, container);
                 visual.name = $"Cell({x}, {y})";
                 visuals[x, y] = visual;
             }

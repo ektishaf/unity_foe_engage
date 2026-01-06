@@ -30,12 +30,12 @@ public class PathPreview : MonoBehaviour
         line.positionCount = path.Count + 1;
 
         // Start at unit position
-        line.SetPosition(0, GridUtility.GridToWorld(path[0].x, path[0].y, grid.cellSize));
+        line.SetPosition(0, grid.GridToWorld(path[0].x, path[0].y));
 
         for (int i = 0; i < path.Count; i++)
         {
-            Vector3 pos = GridUtility.GridToWorld(path[i].x, path[i].y, grid.cellSize);
-            pos.y += 0.2f; // slightly above grid
+            Vector3 pos = grid.GridToWorld(path[i].x, path[i].y);
+            pos.y += 0.2f;
             line.SetPosition(i + 1, pos);
         }
     }

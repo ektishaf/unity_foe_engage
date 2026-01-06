@@ -25,7 +25,7 @@ public class FogVisual : MonoBehaviour
         {
             for (int y = 0; y < grid.height; y++)
             {
-                GameObject visual = Instantiate(settings.fogCellPrefab, GridUtility.GridToWorld(x, y, grid.cellSize), Quaternion.identity, container);
+                GameObject visual = Instantiate(settings.fogCellPrefab, grid.GridToWorld(x, y), Quaternion.identity, container);
                 visual.name = $"Fog_{x}_{y}";
                 visuals[x, y] = visual;
             }

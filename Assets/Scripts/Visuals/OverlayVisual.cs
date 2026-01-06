@@ -5,12 +5,13 @@ public class OverlayVisual : MonoBehaviour
 {
     GameSettings settings;
     Transform container;
-    GridVisual gridVisual;
+    Grid grid;
     List<GameObject> visuals = new List<GameObject>();
     
-    public void Init()
+    public void Init(Grid grid)
     {
         settings = GameSettingsLoader.Settings;
+        this.grid = grid;
 
         container = new GameObject("OverlayContainer").transform;
         container.position = Vector3.zero;
@@ -21,7 +22,7 @@ public class OverlayVisual : MonoBehaviour
     {
         foreach (var pos in positions)
         {
-            GameObject visual = Instantiate(settings.moveCellPrefab, GridUtility.GridToWorld(pos.x, pos.y, settings.cellSize) + Vector3.up * 0.05f, Quaternion.identity, container);
+            GameObject visual = Instantiate(settings.moveCellPrefab, grid.GridToWorld(pos.x, pos.y) + Vector3.up * 0.05f, Quaternion.identity, container);
             visuals.Add(visual);
         }
     }
@@ -30,7 +31,7 @@ public class OverlayVisual : MonoBehaviour
     {
         foreach (var pos in positions)
         {
-            GameObject visual = Instantiate(settings.attackCellPrefab, GridUtility.GridToWorld(pos.x, pos.y, settings.cellSize) + Vector3.up * 0.05f, Quaternion.identity, container);
+            GameObject visual = Instantiate(settings.attackCellPrefab, grid.GridToWorld(pos.x, pos.y) + Vector3.up * 0.05f, Quaternion.identity, container);
             visuals.Add(visual);
         }
     }

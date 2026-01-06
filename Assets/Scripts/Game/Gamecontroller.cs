@@ -44,9 +44,9 @@ public class GameController : MonoBehaviour
         unitMap = new Unit[grid.width, grid.height];
 
         gridVisual.Init(grid);
-        unitVisual.Init();
+        unitVisual.Init(grid);
         cursorVisual.Init(cursor);
-        overlayVisual.Init();
+        overlayVisual.Init(grid);
         fogVisual.Init(grid);
         pathPreview.Init(grid);
     }
@@ -55,7 +55,6 @@ public class GameController : MonoBehaviour
     {
         gridVisual.Build();
         SpawnUnits();
-        overlayVisual.Init();
         fogVisual.Build();
         fogVisual.UpdateFog(units.ToArray());
         unitMap = BuildUnitMap(units, grid.width, grid.height);
@@ -120,14 +119,13 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown(settings.selectKey))
         {
-            // select unit under cursor
             foreach (var unit in units)
             {
                 if (unit.x == cursor.x && unit.y == cursor.y)
                 {
                     selectedUnit = unit;
                     Debug.Log($"Selected Unit: {unit.unitName}, Team: {unit.team}");
-                    //ShowUnitRanges(u);
+                    // Show popup
                     return;
                 }
             }
@@ -137,14 +135,15 @@ public class GameController : MonoBehaviour
 
         if (selectedUnit != null)
         {
-            // move unit with cursor and M key
             if (Input.GetKeyDown(settings.moveKey))
             {
-                selectedUnit.x = cursor.x;
-                selectedUnit.y = cursor.y;
-                unitVisual.UpdateUnitPosition(selectedUnit);
-                overlayVisual.Clear();
-                fogVisual.UpdateFog(units.ToArray());
+                Vector2Int target = new Vector2Int(cursor.x, cursor.y);
+                HashSet<Vector2Int> currentMoveRange = ShowMovementRange(selectedUnit);
+                if (!currentMoveRange.Contains(target))return;
+
+                var path = PathFinder.FindPathAStar(selectedUnit, target, grid, unitMap);
+                if (path == null || path.Count == 0) return;
+                StartCoroutine(MoveUnitStepByStep(selectedUnit, path));
             }
         }
 
@@ -157,18 +156,47 @@ public class GameController : MonoBehaviour
         UpdatePathPreview();
     }
 
-    public void ShowMovementRange(Unit u)
+    IEnumerator MoveUnitStepByStep(Unit unit, List<Vector2Int> path)
+    {
+        int remainingMP = unit.movementPoints;
+
+        foreach (var step in path)
+        {
+            int cost = grid.Get(step.x, step.y).moveCost;
+            if (remainingMP < cost) break;
+
+            // Logical move
+            unit.x = step.x;
+            unit.y = step.y;
+
+            // Visual move (smooth)
+            unitVisual.UpdateUnitPosition(unit);
+            yield return new WaitForSeconds(0.15f); // movement speed
+
+            remainingMP -= cost;
+        }
+
+        unit.hasActed = true;
+
+        overlayVisual.Clear();
+        fogVisual.UpdateFog(units.ToArray());
+    }
+
+
+    public HashSet<Vector2Int> ShowMovementRange(Unit u)
     {
         overlayVisual.Clear();
         var moveRange = MovementSystem.GetMoveRange(grid, u);
         overlayVisual.ShowMovement(moveRange);
+        return moveRange;
     }
 
-    public void ShowAttackRange(Unit u)
+    public HashSet<Vector2Int> ShowAttackRange(Unit u)
     {
         overlayVisual.Clear();
         var attackRange = MovementSystem.GetAttackRange(grid, u);
         overlayVisual.ShowAttack(attackRange);
+        return attackRange;
     }
 
     void UpdatePathPreview()
@@ -244,7 +272,7 @@ public class GameController : MonoBehaviour
     void EndSelectedUnitTurn()
     {
         selectedUnit.hasActed = true;
-        SwitchUnit(); // auto-advance
+        SwitchUnit();
     }
 
     void EndPhase()
@@ -270,7 +298,7 @@ public class GameController : MonoBehaviour
         }
     }
 
-    // AI
+    #region AI
     IEnumerator RunAITurn()
     {
         Debug.Log("AI TURN START");
@@ -300,7 +328,6 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(0.3f);
         EndPhase();
     }
-
 
     void StartAITurn()
     {
@@ -473,16 +500,38 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        // Move toward target
-        var path = AStarPathfinderAI.FindPath(
+        var path = PathFinder.FindPathAStar(
+            ai,
+            target.GridPos,
             grid,
-            new Vector2Int(ai.x, ai.y),
-            new Vector2Int(target.x, target.y)
-        );
+            unitMap
+            );
 
-        if (path != null && path.Count > 0)
+        if (path == null || path.Count == 0)
         {
-            MoveUnit(ai, path[0]); // single-step movement
+            ai.hasActed = true;
+            return;
+        }
+
+        // 3️⃣ Walk path until movement points are exhausted
+        int remainingMP = ai.movementPoints;
+
+        foreach (var step in path)
+        {
+            int cost = grid.Get(step.x, step.y).moveCost;
+
+            if (remainingMP < cost)
+                break;
+
+            MoveUnit(ai, step);
+            remainingMP -= cost;
+        }
+
+        // 4️⃣ Check attack again AFTER movement
+        dist = Mathf.Abs(ai.x - target.x) + Mathf.Abs(ai.y - target.y);
+        if (dist <= ai.attackRange)
+        {
+            ExecuteAttack(ai, target);
         }
 
         ai.hasActed = true;
@@ -507,16 +556,53 @@ public class GameController : MonoBehaviour
             return;
         }
 
-        // Pathfind smartly
-        var path = AStarPathfinderAI.FindPath(
+        var path = PathFinder.FindPathAStar(
+            ai,
+            target.GridPos,
             grid,
-            new Vector2Int(ai.x, ai.y),
-            new Vector2Int(target.x, target.y)
-        );
+            unitMap
+            );
 
-        if (path != null && path.Count > 0)
+        if (path == null || path.Count == 0)
         {
-            MoveUnit(ai, path[0]);
+            ai.hasActed = true;
+            return;
+        }
+
+        // 3️⃣ Move intelligently (respect MP & stop in range)
+        int remainingMP = ai.movementPoints;
+
+        foreach (var step in path)
+        {
+            /*int futureDist =
+                Mathf.Abs(step.x - target.x) +
+                Mathf.Abs(step.y - target.y);
+
+            // Stop if we can already attack from here
+            if (futureDist <= ai.attackRange)
+                break;*/
+
+            int cost = grid.Get(step.x, step.y).moveCost;
+            if (remainingMP < cost)
+                break;
+
+            MoveUnit(ai, step);
+            remainingMP -= cost;
+
+            // 🔹 THEN CHECK ATTACK RANGE
+            int distAfterMove =
+                Mathf.Abs(ai.x - target.x) +
+                Mathf.Abs(ai.y - target.y);
+
+            if (distAfterMove <= ai.attackRange)
+                break;
+        }
+
+        // 4️⃣ Post-move attack
+        dist = Mathf.Abs(ai.x - target.x) + Mathf.Abs(ai.y - target.y);
+        if (dist <= ai.attackRange)
+        {
+            ExecuteAttack(ai, target);
         }
 
         ai.hasActed = true;
@@ -540,32 +626,29 @@ public class GameController : MonoBehaviour
 
         return best;
     }
-
-
+    #endregion
 
     public static Unit[,] BuildUnitMap(List<Unit> units, int width, int height)
     {
         Unit[,] unitMap = new Unit[width, height];
 
-        foreach (Unit u in units)
+        foreach (Unit unit in units)
         {
-            if (u.x < 0 || u.x >= width ||
-                u.y < 0 || u.y >= height)
+            if (unit.x < 0 || unit.x >= width || unit.y < 0 || unit.y >= height)
             {
-                Debug.LogError($"Unit {u.unitName} out of bounds");
+                Debug.LogError($"Unit {unit.unitName} out of bounds");
                 continue;
             }
 
-            if (unitMap[u.x, u.y] != null)
+            if (unitMap[unit.x, unit.y] != null)
             {
-                Debug.LogError($"Cell occupied at {u.x},{u.y}");
+                Debug.LogError($"Cell occupied at {unit.x},{unit.y}");
                 continue;
             }
 
-            unitMap[u.x, u.y] = u;
+            unitMap[unit.x, unit.y] = unit;
         }
 
         return unitMap;
     }
-
 }
